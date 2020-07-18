@@ -1,0 +1,9 @@
+[
+  {
+    "match": "http+https://localhost:8001/",
+    "host": "localhost",
+    "port": 9001,
+    "authenticate": false,
+    "disabled": false
+  }
+]

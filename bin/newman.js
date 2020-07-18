@@ -65,9 +65,13 @@ program
         'Specify the Client SSL passphrase (optional, needed for passphrase protected keys).')
     .option('--ssl-extra-ca-certs <path>',
         'Specify additionally trusted CA certificates')
+    .option('--proxy-list <path>', 'Specify a Path to a file containing proxies.')
+    .option('--proxy <value>', 'Proxy to use for running the collection.')
+    .option('--pac <path>', 'Specify path to PAC file.')
     .option('--verbose', 'Show detailed information of collection run and each request sent')
     .action((collection, command) => {
         let options = util.commanderToObject(command),
+
 
             // parse custom reporter options
             reporterOptions = util.parseNestedOptions(program._originalArgs, '--reporter-', options.reporters);

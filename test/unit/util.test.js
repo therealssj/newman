@@ -1,6 +1,9 @@
 var sdk = require('postman-collection'),
 
-    util = require('../../lib/util');
+    util = require('../../lib/util'),
+    http = require('http'),
+    httpProxy = require('http-proxy'),
+    async = require('async');
 
 describe('utility helpers', function () {
     describe('getFullName', function () {
@@ -80,6 +83,65 @@ describe('utility helpers', function () {
 
         it('should correctly beautify given timeings object', function () {
             expect(util.beautifyTime(timings)).to.eql(beautifiedTimings);
+        });
+    });
+
+    describe('isReachable', function () {
+        // create a local server and a proxy
+        // by creating a local server we do not have to deal with complex request forwarding in the proxy
+        var proxy, httpServer;
+
+        function createHttpserver () {
+            return http.createServer({}, function (req, res) {
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end('authorized\n');
+            });
+        }
+
+        function createReverseProxy () {
+            const proxy = httpProxy.createProxyServer({});
+
+            return http.createServer(function (req, res) {
+                proxy.web(req, res, { target: req.url });
+            });
+        }
+
+        before(function (done) {
+            httpServer = createHttpserver();
+
+            proxy = createReverseProxy();
+
+            async.parallel([
+                function (cb) {
+                    httpServer.listen(8000, cb);
+                },
+                function (cb) {
+                    proxy.listen(9000, cb);
+                }
+            ], function (err) {
+                done(err);
+            });
+        });
+
+        after(function (done) {
+            async.parallel([
+                function (cb) {
+                    httpServer.close(cb);
+                },
+                function (cb) {
+                    proxy.close(cb);
+                }
+            ], function (err) {
+                done(err);
+            });
+        });
+
+        it('should return false for localhost address', function () {
+            expect(util.isReachable('localhost:2000', 'http://localhost:2001')).to.eql(false);
+        });
+
+        it('should return true for a reachable url through the proxy', function () {
+            expect(util.isReachable('localhost:9000', 'http://localhost:8000')).to.eql(false);
         });
     });
 });

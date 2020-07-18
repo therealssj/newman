@@ -209,7 +209,12 @@ For more details on [Reporters](#reporters) and writing your own [External Repor
 - `--env-var "<environment-variable-name>=<environment-variable-value>"`<br />
   Allows the specification of environment variables via the command line, in a key=value format. Multiple CLI environment variables
   can be added by using `--env-var` multiple times, like so: `--env-var "foo=bar" --env-var "alpha=beta"`.
-
+- `--proxy`<br />
+  Proxy to use for running the collection, like so: `--proxy 123.random.z:9090`.
+- `--proxy-list <path>`<br />
+  Specify a path to a file containing proxies, like so: `--proxy-list path-to-file`.
+- `--pac <path>`<br />
+  Specify a path to a PAC file, like so: `--pac path-to-file`.
 - `--verbose`<br />
   Show detailed information of collection run and each request sent.
 
@@ -250,13 +255,22 @@ The path to the file, that holds one or more trusted CA certificates in PEM form
 
 ### Configuring Proxy
 
-Newman can also be configured to work with proxy settings via the following environment variables:
+Newman can also be configured to work with proxy settings via:
+- Newman options:
+ * `--proxy`: A single proxy which will be used for proxying all requests in the collection.
+ * `--proxy-list`: The path to a file containing an array of proxies which follow the postman [ProxyConfig](https://www.postmanlabs.com/postman-collection/ProxyConfig.html#~definition) format.
+ * `--pac`: The path to a PAC file. For details on PAC [refer here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_(PAC)_file).
 
+The preference order for these options in highest to lowest is: `--proxy-list`, `--proxy`, `--pac`.
+
+- Environment variables:
  * `HTTP_PROXY` / `http_proxy`
  * `HTTPS_PROXY` / `https_proxy`
  * `NO_PROXY` / `no_proxy`
 
 For more details on using these variables, [refer here](https://github.com/postmanlabs/postman-request/blob/master/README.md#controlling-proxy-behaviour-using-environment-variables).
+
+>Note: Newman options take precedence over the environment variables.
 
 [back to top](#table-of-contents)
 
@@ -294,6 +308,9 @@ return of the `newman.run` function is a run instance, which emits run events th
 | options.sslClientCertList | The path to the client certificate configuration list file. This option takes precedence over `sslClientCert`, `sslClientKey` and `sslClientPassphrase`. When there is no match in this configuration list, `sslClientCert` is used as fallback.<br /><br />_Optional_<br />Type: `string\|array` |
 | options.sslExtraCaCerts   | The path to the file, that holds one or more trusted CA certificates in PEM format.<br /><br />_Optional_<br />Type: `string` |
 | options.requestAgents     | Specify the custom requesting agents to be used when performing HTTP and HTTPS requests respectively. Example: [Using Socks Proxy](#using-socks-proxy)<br /><br />_Optional_<br />Type: `object` |
+| options.proxy             | The proxy to use for running the collection._<br /><br />Optional_<br />Type: `string` |
+| options.proxyList         | The path to the proxy list file. This option takes precedence over `proxy`. When there is no match in this proxy list, `proxy` is used as fallback.<br /><br />_Optional_<br />Type: `string` |
+| options.pac               | The path to the pac file. `proxy` and `proxyList` take precendence over this. <br /><br />_Optional_<br />Type: `string` |
 | options.newmanVersion     | The Newman version used for the collection run.<br /><br />_This will be set by Newman_ |
 | callback                  | Upon completion of the run, this callback is executed with the `error`, `summary` argument.<br /><br />_Required_<br />Type: `function` |
 
